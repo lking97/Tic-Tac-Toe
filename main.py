@@ -1,149 +1,122 @@
-#Array for holding game board data
-board = ["-"] * 9
+class TicTacToe:
+    def __init__(self):
+        """Initialize the game state."""
+        self.board = ["-"] * 9                  # 3x3 board represented as a list
+        self.current_player = "X"               # X always starts
+        self.winner = None                      # Stores the winner ("X" or "O")
+        self.game_still_running = True          # Tracks if the game is active
 
-#Tells us if the game is still running
-game_still_running = True
+    def display_board(self):
+        """Prints the current board with position references (1-9)."""
+        print("\n")
+        print(f"{self.board[0]} | {self.board[1]} | {self.board[2]}     1 | 2 | 3")
+        print(f"{self.board[3]} | {self.board[4]} | {self.board[5]}     4 | 5 | 6")
+        print(f"{self.board[6]} | {self.board[7]} | {self.board[8]}     7 | 8 | 9")
+        print("\n")
 
-#Tells us who the winner is
-winner = None
+    def handle_turn(self):
+        """Handles a single player's move with input validation."""
+        print(f"{self.current_player}'s turn.")
+        position = input("Choose a position from 1-9: ")
 
-#Tells us who the current player is
-current_player = "X"
+        # Input validation loop
+        while True:
+            # Check if input is valid number
+            if position not in [str(n) for n in range(1,10)]:
+                position = input("Invalid input. Choose a number 1-9: ")
+                continue
 
-#Displays the game board
-def display_board():
-    print("\n")
-    print(board[0] + " | " + board[1] + " | " + board[2] + "     1 | 2 | 3")
-    print(board[3] + " | " + board[4] + " | " + board[5] + "     4 | 5 | 6")
-    print(board[6] + " | " + board[7] + " | " + board[8] + "     7 | 8 | 9")
-    print("\n")
+            # Convert to list index
+            position = int(position) - 1
 
-#Handles player turns
-def handle_turn(player):
-    print(player + "'s turn.")
-    position = input("Choose a position from 1-9: ")
-    valid = False
+            # Check if spot is free
+            if self.board[position] != "-":
+                position = input("That spot is taken. Choose another: ")
+                continue
 
-    while not valid:
-        while position not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
-            position = input("Choose a position from 1-9: ")
-
-        position = int(position) - 1
-
-        if board[position] == "-":
-            valid = True
-        else:
-            print("You can't go there. Go again.")
-
-    board[position] = player
-    display_board()
-
-#Changes player after turn
-def change_player():
-    global current_player
-    current_player = "O" if current_player == "X" else "X"
-
-#Checks rows for a win
-def check_rows():
-    global game_still_running
-
-    row_1 = board[0] == board[1] == board[2] != "-"
-    row_2 = board[3] == board[4] == board[5] != "-"
-    row_3 = board[6] == board[7] == board[8] != "-"
-
-    if row_1 or row_2 or row_3:
-        game_still_running = False
-
-    if row_1: return board[0]
-    elif row_2: return board[3]
-    elif row_3: return board[6]
-    else: return None
-
-# Checks columns for a win
-def check_columns():
-    global game_still_running
-
-    column_1 = board[0] == board[3] == board[6] != "-"
-    column_2 = board[1] == board[4] == board[7] != "-"
-    column_3 = board[2] == board[5] == board[8] != "-"
-
-    if column_1 or column_2 or column_3:
-            game_still_running = False
-
-    if column_1: return board[0]
-    elif column_2: return board[1]
-    elif column_3: return board[2]
-    else: return None
-
-# Checks diagonals for a win
-def check_diagonals():
-    global game_still_running
-
-    diagonal_1 = board[0] == board[4] == board[8] != "-"
-    diagonal_2 = board[2] == board[4] == board[6] != "-"
-
-    if diagonal_1 or diagonal_2:
-        game_still_running = False
-
-    if diagonal_1: return board[0]
-    elif diagonal_2: return board[2]
-    else: return None
-
-#Checks for a winner
-def check_winner():
-    global winner
-    row_winner = check_rows()
-    column_winner = check_columns()
-    diagonal_winner = check_diagonals()
-
-    if row_winner: winner = row_winner
-    elif column_winner: winner = column_winner
-    elif diagonal_winner: winner = diagonal_winner
-    else: winner = None
-
-#Checks for a tie
-def check_tie():
-    global game_still_running
-
-    if "-" not in board:
-        game_still_running = False
-        return True
-    else:
-        return False
-
-#Checks if game is over
-def check_game_over():
-    check_winner()
-    check_tie()
-
-#Plays game
-def play_game():
-    global game_still_running, winner, current_player, board
-
-    #reset game state
-    board = ["-"] * 9
-    game_still_running = True
-    winner = None
-    current_player = "X"
-
-    display_board()
-
-    while game_still_running:
-        handle_turn(current_player)
-        check_game_over()
-        change_player()
-    if winner:
-        print(winner + " won.")
-    else:
-        print("Tie.")
-
-# Main loop with restart option
-def start():
-    while True:
-        play_game()
-        restart = input("Play again? (y/n): ").lower()
-        if restart != "y":
-            print("Thanks for playing!")
+            # Exit loop if valid move
             break
 
-start()
+        # Place the player's mark on the board
+        self.board[position] = self.current_player
+        self.display_board()
+
+    def change_player(self):
+        """Switches the active player (X ↔ O)."""
+        self.current_player = "O" if self.current_player == "X" else "X"
+
+    def check_rows(self):
+        """Check all rows for a win."""
+        for i in range(0, 9, 3):    # 0-2, 3-5, 6-8
+            if self.board[i] == self.board[i + 1] == self.board[i + 2] != "-":
+                self.game_still_running = False
+                return self.board[i]    # Return the winner symbol
+        return None
+
+    def check_columns(self):
+        """Check all columns for a win."""
+        for i in range(3):  # First three columns
+            if self.board[i] == self.board[i + 3] == self.board[i + 6] != "-":
+                self.game_still_running = False
+                return self.board[i]
+        return None
+
+    def check_diagonals(self):
+        """Check both diagonals for a win."""
+        # Top-left → bottom-right
+        if self.board[0] == self.board[4] == self.board[8] != "-":
+            self.game_still_running = False
+            return self.board[0]
+        # Top-right → bottom-left
+        if self.board[2] == self.board[4] == self.board[6] != "-":
+            self.game_still_running = False
+            return self.board[2]
+        return None
+
+    def check_winner(self):
+        """Determine the winner of the game, if any."""
+        self.winner = (
+            self.check_rows()
+            or self.check_columns()
+            or self.check_diagonals()
+        )
+
+    def check_tie(self):
+        """Check if the board is full and no winner exists (tie)."""
+        if "-" not in self.board and not self.winner:
+            self.game_still_running = False
+
+    def check_game_over(self):
+        """Check if the game should end due to win or tie."""
+        self.check_winner()
+        self.check_tie()
+
+    def play_game(self):
+        """Play one full game of TicTacToe."""
+        self.__init__()     # Reset game state at start
+        self.display_board()
+
+        # Main game loop
+        while self.game_still_running:
+            self.handle_turn()
+            self.check_game_over()
+            if self.game_still_running:     # Prevents unnecessary switch after win
+                self.change_player()
+
+        # Show result
+        if self.winner:
+            print(f"{self.winner} won!")
+        else:
+            print("It's a tie!")
+
+    def start(self):
+        while True:
+            self.play_game()
+            restart = input("Play again? (y/n): ").lower()
+            if restart != "y":
+                print("Thanks for playing!")
+                break
+
+# Run game if executed directly
+if __name__ == "__main__":
+    TicTacToe().start()
